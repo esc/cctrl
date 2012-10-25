@@ -27,7 +27,7 @@ except ImportError:
     import simplejson as json
 
 from cctrl.error import messages, PasswordsDontMatchException
-from cctrl.settings import TOKEN_FILE_PATH, HOME_PATH
+from cctrl.settings import TOKEN_FILE_PATH, HOME_PATH, CONFIG_FILE_PATH
 
 
 def update_tokenfile(api):
@@ -100,6 +100,14 @@ def get_credentials(create=False):
         to make sure, that no typing error occurred. This is done three times
         after that a PasswordsDontMatchException is thrown.
     """
+    if os.path.exists(CONFIG_FILE_PATH):
+        try:
+            with open(CONFIG_FILE_PATH) as config_fp:
+                config_json = json.loads(config_fp.read())
+            return config_json['email'], config_json['password']
+        except (ValueError, IOError, KeyError):
+            # fall through to normal authorization
+            pass
     email = raw_input('Email   : ')
     password = None
     for i in range(3):
