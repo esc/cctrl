@@ -102,10 +102,16 @@ def read_configfile():
             # fall through to normal authorization
             pass
 
-def write_configfile(overwrite=False):
-    email, password = get_credentials(read=False)
-    with open(CONFIG_FILE_PATH, 'w') as config_fp:
-        config_fp.write(json.dumps({'email': email, 'password': password}))
+
+def write_configfile(*args):
+    if os.path.exists(CONFIG_FILE_PATH):
+        question = raw_input(
+                "'%s' exsits, type 'Yes' without the quotes to overwrite:"
+                % CONFIG_FILE_PATH)
+    if question.lower() == 'yes':
+        email, password = get_credentials(read=False)
+        with open(CONFIG_FILE_PATH, 'w') as config_fp:
+            config_fp.write(json.dumps({'email': email, 'password': password}))
 
 
 def get_credentials(create=False, read=True):
