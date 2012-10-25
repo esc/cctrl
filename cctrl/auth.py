@@ -92,14 +92,7 @@ def delete_tokenfile():
     return False
 
 
-def get_credentials(create=False):
-    """
-        We use this to ask the user for his credentials in case we have no
-        valid token.
-        If create is true, the user is asked twice for the password,
-        to make sure, that no typing error occurred. This is done three times
-        after that a PasswordsDontMatchException is thrown.
-    """
+def read_configfile():
     if os.path.exists(CONFIG_FILE_PATH):
         try:
             with open(CONFIG_FILE_PATH) as config_fp:
@@ -108,6 +101,25 @@ def get_credentials(create=False):
         except (ValueError, IOError, KeyError):
             # fall through to normal authorization
             pass
+
+def write_configfile(overwrite=False):
+    email, password = get_credentials(read=False)
+    with open(CONFIG_FILE_PATH, 'w') as config_fp:
+        config_fp.write(json.dumps({'email': email, 'password': password}))
+
+
+def get_credentials(create=False, read=True):
+    """
+        We use this to ask the user for his credentials in case we have no
+        valid token.
+        If create is true, the user is asked twice for the password,
+        to make sure, that no typing error occurred. This is done three times
+        after that a PasswordsDontMatchException is thrown.
+    """
+    if read:
+        credentials = read_configfile()
+        if credentials is not None:
+            return credentials
     email = raw_input('Email   : ')
     password = None
     for i in range(3):
